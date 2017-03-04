@@ -6,69 +6,58 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Build;
-import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.util.Log;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
+public class MainActivity extends AppCompatActivity {
+    private LocationManager lm;
 
-public class MainActivity extends AppCompatActivity
-        implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
-    GoogleApiClient mGoogleApiClient;
-    Location mLastLocation;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .build();
+        lm =
+                (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
         }
-    }
+        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0,
+                new LocationListener() {
+                    @Override
+                    public void onLocationChanged(Location location) {
+                        Log.d("LOC1", "Location Chagne!! " + location.getLatitude() + "," + location.getLongitude());
+                        Location loc101 = new Location("LOC101");
+                        loc101.setLatitude(25.0335);
+                        loc101.setLongitude(121.5642);
+                        double d = location.distanceTo(loc101);
+                        Log.d("LOC1", "To 101:" + d);
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mGoogleApiClient.connect();
-    }
+                    }
 
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ContextCompat.checkSelfPermission(this,
-                    android.Manifest.permission.ACCESS_FINE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
-        }
+                    @Override
+                    public void onStatusChanged(String provider, int status, Bundle extras) {
 
-        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
-        if (mLastLocation != null)
-        {
-// 取到手機地點後的程式碼
-            Log.d("LOC1", "Location Connected!! " + mLastLocation.getLatitude() + "," + mLastLocation.getLongitude());
-        }
-    }
+                    }
 
-    @Override
-    public void onConnectionSuspended(int i) {
+                    @Override
+                    public void onProviderEnabled(String provider) {
 
-    }
+                    }
 
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+                    @Override
+                    public void onProviderDisabled(String provider) {
+
+                    }
+                });
 
     }
 }
